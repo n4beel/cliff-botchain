@@ -16,6 +16,10 @@
  * it is set on light stock with serif headings — closer to a term sheet than to a dashboard.
  */
 :root {
+  /* Native controls follow this: without it the browser paints the date picker's
+     calendar glyph for a light page, which on a dark one is simply invisible, and the
+     picker popup comes up in the wrong palette. Scrollbars and selects follow too. */
+  color-scheme: light;
   --bg-base: #F7F8F6;
   --bg-surface: #FFFFFF;
   --bg-elevated: #EFF1EC;
