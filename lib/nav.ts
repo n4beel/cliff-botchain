@@ -1,5 +1,6 @@
 import type { NavItem } from "@/components/layout/PageShell";
 
 export const NAV: NavItem[] = [
-  { href: "/", label: "Create Schedule" },
+  { href: "/", label: "Create" },
+  { href: "/schedules", label: "Schedules" },
 ];

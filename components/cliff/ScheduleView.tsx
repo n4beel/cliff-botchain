@@ -23,7 +23,7 @@ import Badge from "@/components/ui/Badge";
 import Spinner from "@/components/ui/Spinner";
 import TxStatus, { type TxStage } from "@/components/ui/TxStatus";
 import { useToast } from "@/components/ui/Toast";
-import { addressUrl, isBotChainId } from "@/lib/botchain/chain";
+import { activeBotChain, addressUrl, isBotChainId } from "@/lib/botchain/chain";
 import { getDeployment, ZERO_ADDRESS } from "@/lib/botchain/deployment";
 import { cliffAbi } from "@/lib/botchain/abi";
 import {
@@ -35,6 +35,10 @@ import {
   vestingProgressPercent,
   type CliffSchedule,
 } from "@/lib/cliff";
+
+// The chain's own symbol. Hardcoding "BOT" labelled every testnet amount as mainnet
+// currency, which is the confusion the network badge exists to prevent.
+const SYMBOL = activeBotChain.nativeCurrency.symbol;
 
 export default function ScheduleView({ id }: { id: string }) {
   const chainId = useChainId();
@@ -222,18 +226,18 @@ export default function ScheduleView({ id }: { id: string }) {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2">
             <StatCard
               label="Total Locked"
-              value={`${formatEther(schedule.total)} BOT`}
+              value={`${formatEther(schedule.total)} ${SYMBOL}`}
               sub={`${schedule.total.toString()} wei`}
             />
             <StatCard
               label="Released So Far"
-              value={`${formatEther(schedule.released)} BOT`}
+              value={`${formatEther(schedule.released)} ${SYMBOL}`}
               sub={`${schedule.released.toString()} wei`}
             />
             <StatCard
               label="Releasable Now"
-              value={`${formatEther(releasableAmount)} BOT`}
-              sub={`Vested: ${formatEther(vestedAmount)} BOT`}
+              value={`${formatEther(releasableAmount)} ${SYMBOL}`}
+              sub={`Vested: ${formatEther(vestedAmount)} ${SYMBOL}`}
               highlight={releasableAmount > 0n}
             />
           </div>
@@ -490,7 +494,7 @@ function ReleaseAction({
                   disabled={releasable === 0n}
                 >
                   {releasable > 0n
-                    ? `Release ${formatEther(releasable)} BOT`
+                    ? `Release ${formatEther(releasable)} ${SYMBOL}`
                     : status === "Before cliff"
                       ? "Cliff Not Reached Yet"
                       : status === "Completed"

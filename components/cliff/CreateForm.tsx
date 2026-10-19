@@ -17,9 +17,13 @@ import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import TxStatus, { type TxStage } from "@/components/ui/TxStatus";
 import { useToast } from "@/components/ui/Toast";
-import { isBotChainId } from "@/lib/botchain/chain";
+import { activeBotChain, isBotChainId } from "@/lib/botchain/chain";
 import { getDeployment, ZERO_ADDRESS } from "@/lib/botchain/deployment";
 import { cliffAbi } from "@/lib/botchain/abi";
+
+// The chain's own symbol. Hardcoding "BOT" labelled every testnet amount as mainnet
+// currency, which is the confusion the network badge exists to prevent.
+const SYMBOL = activeBotChain.nativeCurrency.symbol;
 
 export default function CreateForm() {
   return (
@@ -352,7 +356,7 @@ function CreateFormInner() {
 
         {stage === "idle" || stage === "failed" ? (
           <Button onClick={handleCreate} disabled={!formValid}>
-            Create Schedule ({amount ? `${amount} BOT` : "..."})
+            Create Schedule ({amount ? `${amount} ${SYMBOL}` : "..."})
           </Button>
         ) : null}
 
