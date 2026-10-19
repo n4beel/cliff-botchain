@@ -2,9 +2,9 @@
 pragma solidity 0.8.23;
 
 import {Script, console2} from "forge-std/Script.sol";
-// import {YourContract} from "../src/YourContract.sol";
+import {Cliff} from "../src/Cliff.sol";
 
-/// @notice Deploys this project's contract and prints the two env lines the frontend needs.
+/// @notice Deploys Cliff and prints the two env lines the frontend needs.
 /// @dev Bohr testnet first:
 ///   forge script script/Deploy.s.sol --rpc-url bohr --broadcast
 /// Mainnet only once the full flow passes on testnet. Mainnet BOT has no faucet, so prefer passing
@@ -15,13 +15,13 @@ contract Deploy is Script {
     uint256 deployerKey = vm.envUint("DEPLOYER_PRIVATE_KEY");
 
     vm.startBroadcast(deployerKey);
-    // YourContract deployed = new YourContract();
+    Cliff deployed = new Cliff();
     vm.stopBroadcast();
 
-    address deployedAddress = address(0); // address(deployed);
+    address deployedAddress = address(deployed);
 
     console2.log("chain id        ", block.chainid);
-    console2.log("contract        ", deployedAddress);
+    console2.log("Cliff           ", deployedAddress);
     console2.log("");
     console2.log("Add to .env.local:");
     console2.log(
