@@ -51,3 +51,16 @@ export function scheduleStatus(s: CliffSchedule, now?: number): ScheduleStatus {
 export function formatDateTimeUTC(date: Date): string {
   return date.toISOString().replace("T", " ").substring(0, 19) + " UTC";
 }
+
+/**
+ * Days as the contract counts them: whole seconds, rounded down.
+ *
+ * Exported, and used by the create form rather than duplicated inside it, because the form used
+ * to validate the typed number and send a converted one. A duration of 1e-5 days is greater than
+ * zero and floors to zero seconds, so it passed the check and then reverted ZeroDuration with the
+ * sender's gas already spent. Whatever validates must be what is sent.
+ */
+export function daysToWholeSeconds(days: number): number {
+  if (!Number.isFinite(days) || days < 0) return NaN;
+  return Math.floor(days * 86400);
+}

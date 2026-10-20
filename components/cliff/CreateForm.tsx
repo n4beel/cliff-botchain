@@ -20,6 +20,7 @@ import { useToast } from "@/components/ui/Toast";
 import { activeBotChain, isBotChainId } from "@/lib/botchain/chain";
 import { getDeployment, ZERO_ADDRESS } from "@/lib/botchain/deployment";
 import { cliffAbi } from "@/lib/botchain/abi";
+import { daysToWholeSeconds } from "@/lib/cliff";
 
 // The chain's own symbol. Hardcoding "BOT" labelled every testnet amount as mainnet
 // currency, which is the confusion the network badge exists to prevent.
@@ -107,15 +108,26 @@ function CreateFormInner() {
   const cliffDaysNum = Number(cliffDays);
   const durationDaysNum = Number(durationDays);
 
+  // Validate the values that are actually SENT, not the ones that were typed.
+  //
+  // The contract is given whole seconds, and days are floored to get there. A duration of 1e-5
+  // days is greater than zero — so it passed a `> 0` check on the typed number — and floors to 0
+  // seconds, which the contract rejects with ZeroDuration after the sender has paid the gas.
+  // Deriving the check from the converted value closes that gap by construction.
+  const cliffSecondsNum = daysToWholeSeconds(cliffDaysNum);
+  const durationSecondsNum = daysToWholeSeconds(durationDaysNum);
+
   const durationError =
     durationDays !== "" && (!Number.isFinite(durationDaysNum) || durationDaysNum <= 0)
       ? "Duration must be greater than 0 days."
-      : undefined;
+      : durationDays !== "" && durationSecondsNum < 1
+        ? "Duration must be at least one second — that is about 0.0000116 days."
+        : undefined;
 
   const cliffError =
     cliffDays !== "" && (!Number.isFinite(cliffDaysNum) || cliffDaysNum < 0)
       ? "Cliff cannot be negative."
-      : cliffDaysNum > durationDaysNum && durationDaysNum > 0
+      : cliffSecondsNum > durationSecondsNum && durationSecondsNum > 0
         ? "Cliff cannot exceed total vesting duration."
         : undefined;
 
@@ -139,8 +151,8 @@ function CreateFormInner() {
     !durationError &&
     !cliffError &&
     !amountError &&
-    durationDaysNum > 0 &&
-    cliffDaysNum <= durationDaysNum &&
+    durationSecondsNum >= 1 &&
+    cliffSecondsNum <= durationSecondsNum &&
     amountWei !== null &&
     amountWei > 0n;
 
@@ -153,8 +165,8 @@ function CreateFormInner() {
     settledHash.current = null;
 
     try {
-      const cliffSeconds = BigInt(Math.floor(cliffDaysNum * 86400));
-      const durationSeconds = BigInt(Math.floor(durationDaysNum * 86400));
+      const cliffSeconds = BigInt(cliffSecondsNum);
+      const durationSeconds = BigInt(durationSecondsNum);
 
       const txHash = await writeContractAsync({
         address: deployment.address,
@@ -207,8 +219,8 @@ function CreateFormInner() {
     deployment,
     chainId,
     amountWei,
-    cliffDaysNum,
-    durationDaysNum,
+    cliffSecondsNum,
+    durationSecondsNum,
     trimmedBeneficiary,
     writeContractAsync,
     toast,
